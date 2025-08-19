@@ -1,0 +1,23 @@
+{
+  "files.associations": {
+    "raylib.h": "c",
+    "board.h": "c",
+    "string.h": "c",
+    "game.h": "c",
+    "raymath.h": "c",
+    "atomic": "c",
+    "compare": "c",
+    "cstddef": "c",
+    "limits": "c",
+    "memory": "c",
+    "type_traits": "c",
+    "vector": "c",
+    "xmemory": "c",
+    "xstring": "c",
+    "xutility": "c",
+    "debug.h": "c",
+    "tetrimons.h": "c",
+    "tetrominos.h": "c",
+    "stdio.h": "c"
+  }
+}

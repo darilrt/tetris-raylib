@@ -31,7 +31,7 @@ RAYLIB_PATH            ?= ..\..\raylib
 # Starting in 2019 using ARM64 is mandatory for published apps,
 # Starting on August 2020, minimum required target API is Android 10 (API level 29)
 ANDROID_ARCH           ?= ARM64
-ANDROID_API_VERSION    ?= 29
+ANDROID_API_VERSION    ?= 28
 
 ifeq ($(ANDROID_ARCH),ARM)
     ANDROID_ARCH_NAME   = armeabi-v7a
@@ -48,11 +48,11 @@ endif
 
 # Required path variables
 # NOTE: JAVA_HOME must be set to JDK (using OpenJDK 13)
-JAVA_HOME              ?= C:/open-jdk
-ANDROID_HOME           ?= C:/android-sdk
-ANDROID_NDK            ?= C:/android-ndk
+JAVA_HOME              = C:/open_jdk
+ANDROID_HOME           ?= C:/Users/polo/AppData/Local/Android/Sdk
+ANDROID_NDK            ?= C:/Users/polo/AppData/Local/Android/Sdk/ndk/27.0.12077973
 ANDROID_TOOLCHAIN      ?= $(ANDROID_NDK)/toolchains/llvm/prebuilt/windows-x86_64
-ANDROID_BUILD_TOOLS    ?= $(ANDROID_HOME)/build-tools/29.0.3
+ANDROID_BUILD_TOOLS    ?= $(ANDROID_HOME)/build-tools/35.0.0
 ANDROID_PLATFORM_TOOLS  = $(ANDROID_HOME)/platform-tools
 
 # Android project configuration variables
@@ -78,7 +78,7 @@ APP_VERSION_NAME       ?= 1.0
 APP_ICON_LDPI          ?= $(RAYLIB_PATH)\logo\raylib_36x36.png
 APP_ICON_MDPI          ?= $(RAYLIB_PATH)\logo\raylib_48x48.png
 APP_ICON_HDPI          ?= $(RAYLIB_PATH)\logo\raylib_72x72.png
-APP_SCREEN_ORIENTATION ?= landscape
+APP_SCREEN_ORIENTATION ?= portrait
 APP_KEYSTORE_PASS      ?= raylib
 
 # Library type used for raylib: STATIC (.a) or SHARED (.so/.dll)
@@ -162,7 +162,7 @@ all: clear \
 
 # Clear old files and directories that needs to be removed before building
 clear:
-	if exist $(PROJECT_BUILD_PATH)/bin rmdir $(PROJECT_BUILD_PATH)/bin
+	if exist $(PROJECT_BUILD_PATH)\bin rmdir /S /Q $(PROJECT_BUILD_PATH)\bin
 
 # Create required temp directories for APK building
 create_temp_project_dirs:
