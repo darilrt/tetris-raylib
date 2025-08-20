@@ -96,7 +96,55 @@ void DrawGame(const Board *grid, int width, int height)
 
 void GameState_UpdateGame(GameState *state)
 {
+    static GestureEvent event;
+    static bool blockGesture = false;
     GestureHandler_Process(&state->gestureHandler);
+
+    while (GestureHandler_PullEvent(&state->gestureHandler, &event))
+    {
+        if (!blockGesture)
+        {
+            switch (event.gesture)
+            {
+            case GAMEGESTURE_TAP:
+                Board_RotateRight(&state->grid);
+                break;
+
+            case GAMEGESTURE_MOVE_LEFT:
+                Board_MoveLeft(&state->grid);
+                break;
+
+            case GAMEGESTURE_MOVE_RIGHT:
+                Board_MoveRight(&state->grid);
+                break;
+
+            case GAMEGESTURE_MOVE_UP:
+                debug_log("Stored");
+                blockGesture = true;
+                break;
+
+            case GAMEGESTURE_MOVE_DOWN:
+                Board_Fall(&state->grid);
+                blockGesture = true;
+                break;
+
+            default:
+                break;
+            }
+        }
+        else
+        {
+            switch (event.gesture)
+            {
+            case GAMEGESTURE_UP:
+                blockGesture = false;
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
 
     if (IsKeyPressedRepeat(KEY_RIGHT) || IsKeyPressed(KEY_RIGHT) || IsGestureDetected(GESTURE_SWIPE_RIGHT))
         Board_MoveRight(&state->grid);
