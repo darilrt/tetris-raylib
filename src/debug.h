@@ -45,7 +45,7 @@ typedef struct
 Debugger Debugger_New()
 {
     Debugger debugger;
-    debugger.font = LoadFont("resources/fonts/mecha.png");
+    debugger.font = LoadFontEx("resources/test_pack/font.ttf", 32, 0, 250);
     debugger.logCount = 0;
     debugger.screenSize = (Vector2){
         (float)GetScreenWidth(),

@@ -18,6 +18,7 @@
     "debug.h": "c",
     "tetrimons.h": "c",
     "tetrominos.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "timer.h": "c"
   }
 }

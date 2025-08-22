@@ -2,6 +2,7 @@
 #define TETROMINOS_H
 
 #include <string.h>
+#include <assert.h>
 
 typedef enum
 {
@@ -182,6 +183,7 @@ void Tetromino_Rotate(Tetromino *tetromino, int times)
 
 static int Tetromino_At(const Tetromino *tetromino, int row, int col)
 {
+    assert(row >= 0 && row < 4 && col >= 0 && col < 4);
     return tetromino->cells[row][col];
 }
 
