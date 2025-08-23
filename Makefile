@@ -9,7 +9,7 @@ build:
 
 run:
 	make build
-	.\build\raylib-game-template\raylib-game-template.exe
+	cd bin && tetris-game.exe
 
 build-android:
 	cd src && make clean && $(MAKE) PLATFORM=PLATFORM_ANDROID

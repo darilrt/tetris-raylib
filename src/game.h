@@ -146,11 +146,11 @@ void GameState_UpdateGame(GameState *state)
         }
     }
 
-    if (IsKeyPressedRepeat(KEY_RIGHT) || IsKeyPressed(KEY_RIGHT) || IsGestureDetected(GESTURE_SWIPE_RIGHT))
+    if (IsKeyPressedRepeat(KEY_RIGHT) || IsKeyPressed(KEY_RIGHT))
         Board_MoveRight(&state->grid);
-    if (IsKeyPressedRepeat(KEY_LEFT) || IsKeyPressed(KEY_LEFT) || IsGestureDetected(GESTURE_SWIPE_LEFT))
+    if (IsKeyPressedRepeat(KEY_LEFT) || IsKeyPressed(KEY_LEFT))
         Board_MoveLeft(&state->grid);
-    if (IsKeyPressed(KEY_UP) || IsGestureDetected(GESTURE_TAP))
+    if (IsKeyPressed(KEY_UP))
         Board_RotateRight(&state->grid);
     if (IsKeyPressed(KEY_E))
         Board_RotateLeft(&state->grid);
@@ -158,6 +158,8 @@ void GameState_UpdateGame(GameState *state)
         Board_Fall(&state->grid);
     if (IsKeyPressed(KEY_DOWN))
         Board_MoveDown(&state->grid);
+    if (IsKeyPressed(KEY_P))
+        Board_Pause(&state->grid, !&state->grid.isPaused);
 
     Board_Update(&state->grid);
     DrawGame(&state->grid, state->screenWidth, state->screenHeight);

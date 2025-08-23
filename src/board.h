@@ -33,6 +33,7 @@ typedef enum
 
 typedef struct
 {
+    bool isPaused;
     int cells[GRID_ROWS * GRID_COLS];
 
     struct
@@ -45,6 +46,8 @@ typedef struct
 
     Timer timer;
 } Board;
+
+static Texture2D texture = {0};
 
 bool CheckCollision(const Board *board, int x, int y)
 {
@@ -170,6 +173,38 @@ void Board_Init(Board *board)
     Board_NextTetromino(board);
 
     Timer_Reset(&board->timer);
+
+    if (texture.id == 0)
+    {
+        texture = LoadTexture("resources/block.png");
+    }
+}
+
+void Board_Pause(Board *board, bool pause)
+{
+    board->isPaused = pause;
+}
+
+void DrawCell(int x, int y, float cellWidth, float cellHeight, Color color, Texture2D *texture)
+{
+    if (texture && texture->id > 0)
+    {
+        DrawTexturePro(
+            *texture,
+            (Rectangle){0, 0, 7, 7},
+            (Rectangle){x, y, cellWidth, cellHeight},
+            (Vector2){0, 0},
+            0,
+            color);
+        return;
+    }
+
+    DrawRectangle(
+        round(x),
+        round(y),
+        round(cellWidth),
+        round(cellHeight),
+        color);
 }
 
 void DrawTetromino(
@@ -181,6 +216,12 @@ void DrawTetromino(
     int offset_x,
     int offset_y)
 {
+
+    if (!texture.id)
+    {
+        texture = LoadTexture("resources/block.png");
+    }
+
     for (int row = 0; row < 4; row++)
     {
         for (int col = 0; col < 4; col++)
@@ -192,12 +233,13 @@ void DrawTetromino(
 
                 if (gridX >= 0 && gridX < GRID_COLS && gridY >= 0 && gridY < GRID_ROWS)
                 {
-                    DrawRectangle(
-                        offset_x + gridX * cellWidth - 1,
-                        offset_y + gridY * cellHeight - 1,
-                        cellWidth + 1,
-                        cellHeight + 1,
-                        color);
+                    DrawCell(
+                        offset_x + gridX * cellWidth,
+                        offset_y + gridY * cellHeight,
+                        cellWidth,
+                        cellHeight,
+                        color,
+                        &texture);
                 }
             }
         }
@@ -206,8 +248,8 @@ void DrawTetromino(
 
 void Board_Draw(const Board *board, Rectangle area)
 {
-    float cellWidth = area.width / GRID_COLS;
-    float cellHeight = area.height / GRID_ROWS;
+    float cellWidth = round(area.width / GRID_COLS);
+    float cellHeight = round(area.height / GRID_ROWS);
 
     for (int row = 0; row < GRID_ROWS; row++)
     {
@@ -215,12 +257,13 @@ void Board_Draw(const Board *board, Rectangle area)
         {
             int cell = board->cells[row * GRID_COLS + col];
 
-            DrawRectangle(
-                area.x + col * cellWidth - 1,
-                area.y + row * cellHeight - 1,
-                cellWidth + 1,
-                cellHeight + 1,
-                colors[cell]);
+            DrawCell(
+                area.x + col * cellWidth,
+                area.y + row * cellHeight,
+                cellWidth,
+                cellHeight,
+                colors[cell],
+                &texture);
         }
     }
 
@@ -229,6 +272,15 @@ void Board_Draw(const Board *board, Rectangle area)
         &board->tetromino.shape,
         board->tetromino.ghostPosition,
         ghostColor,
+        cellWidth,
+        cellHeight,
+        area.x,
+        area.y);
+
+    DrawTetromino(
+        &board->tetromino.shape,
+        Vector2Subtract(board->tetromino.position, (Vector2){0, cellHeight / 3.0}),
+        (Color){255, 255, 255, 150},
         cellWidth,
         cellHeight,
         area.x,
@@ -294,13 +346,49 @@ void Board_TryRotateWithKick(Board *board, RotationDirection direction)
         return;
     }
 
-    const int kicks[5][2] = {
-        {0, 0},
-        {-1, 0},
-        {-1, 1},
-        {0, -2},
-        {-1, -2},
-    };
+    int kicks[5][2];
+
+    printf("Rotation %d", board->tetromino.shape.rotation_index);
+
+    switch (board->tetromino.shape.type)
+    {
+    case PIECE_I:
+        const int iKicks[4][5][2] = {
+            // 0 -> R
+            {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
+            // R -> 2
+            {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
+            // 2 -> L
+            {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
+            // L -> 0
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
+        };
+
+        memcpy(kicks, iKicks[board->tetromino.shape.rotation_index], sizeof(int[5][2]));
+        break;
+
+    case PIECE_O:
+        const int oKicks[5][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+
+        memcpy(&kicks, &oKicks, sizeof(oKicks));
+        break;
+
+    default:
+        const int kicks[4][5][2] = {
+            // 0 -> R
+            {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
+            // R -> 2
+            {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
+            // 2 -> L
+            {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
+            // L -> 0
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
+        };
+
+        memcpy(kicks, iKicks[board->tetromino.shape.rotation_index], sizeof(int[5][2]));
+        break;
+    }
+
     const Vector2 originalPosition = board->tetromino.position;
 
     for (int i = 0; i < 5; i++)
