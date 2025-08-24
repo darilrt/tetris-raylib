@@ -22,6 +22,8 @@ typedef struct
 
 Theme Theme_New();
 
+void Theme_Free(Theme *theme);
+
 int Theme_Load(Theme *theme, const char *themeName);
 
 #endif

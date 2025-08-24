@@ -50,6 +50,9 @@ int main(void)
         EndDrawing();
     }
 
+    GameState_Free(state);
+    free(state);
     CloseWindow();
+
     return 0;
 }

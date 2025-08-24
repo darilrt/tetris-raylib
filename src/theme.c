@@ -11,6 +11,15 @@ Theme Theme_New()
     return theme;
 }
 
+void Theme_Free(Theme *theme)
+{
+    if (!theme)
+        return;
+
+    free((char *)theme->name);
+    UnloadFont(theme->font);
+}
+
 int Theme_Load(Theme *theme, const char *themeName)
 {
     if (!themeName)
@@ -66,5 +75,6 @@ int Theme_Load(Theme *theme, const char *themeName)
     }
 
     free(path);
+    Config_Free(&config);
     return 1;
 }

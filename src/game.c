@@ -23,9 +23,18 @@ GameState GameState_New()
 
     debug_log("Theme loaded: %s", state.theme.name ? state.theme.name : "No name");
 
+    UnloadFont(get_debugger()->font);
     get_debugger()->font = state.theme.font;
 
     return state;
+}
+
+void GameState_Free(GameState *state)
+{
+    if (!state)
+        return;
+
+    Theme_Free(&state->theme);
 }
 
 Rectangle FitBox(Rectangle original, int width, int height)

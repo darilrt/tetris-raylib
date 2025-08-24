@@ -29,6 +29,8 @@ typedef struct
 
 GameState GameState_New();
 
+void GameState_Free(GameState *state);
+
 Rectangle FitBox(Rectangle original, int width, int height);
 
 void DrawGame(const Board *grid, int width, int height);

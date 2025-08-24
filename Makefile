@@ -1,6 +1,7 @@
 DIR_MAKEFILE := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 APK_FILE = $(DIR_MAKEFILE)/raylib_game.apk
 APP_NAME = com.raylib.rgame
+EXE = tetris-game.exe
 
 .PHONY: build build-android 
 
@@ -9,7 +10,11 @@ build:
 
 run:
 	make build
-	cd bin && tetris-game.exe
+	cd bin && $(EXE)
+
+memory:
+	make build
+	cd bin && drmemory -- $(EXE)
 
 build-android:
 	make -f Makefile.pre clean && $(MAKE) -f Makefile.pre PLATFORM=PLATFORM_ANDROID
