@@ -1,17 +1,10 @@
-#ifndef BOARD_H
-#define BOARD_H
-
-#include <string.h>
-
 #include "raylib.h"
 #include "raymath.h"
 #include "tetrominos.h"
 #include "timer.h"
+#include "board.h"
 
-#define GRID_ROWS 20
-#define GRID_COLS 10
-
-const Color colors[8] = {
+extern const Color colors[8] = {
     {0, 0, 0, 255},     // EMPTY
     {0, 255, 255, 255}, // CIAN
     {255, 255, 0, 255}, // YELLOW
@@ -21,31 +14,6 @@ const Color colors[8] = {
     {255, 0, 0, 255},   // RED
     {255, 0, 255, 255}, // MAGENTA
 };
-
-typedef enum
-{
-    CLOCKWISE = 1,
-    COUNTERCLOCKWISE = 3
-} RotationDirection;
-
-#define MIN_FALL_TIME 0.1f
-#define MAX_FALL_TIME 0.9f
-
-typedef struct
-{
-    bool isPaused;
-    int cells[GRID_ROWS * GRID_COLS];
-
-    struct
-    {
-        Tetromino shape;
-        Vector2 position;
-        Vector2 ghostPosition;
-        int color;
-    } tetromino;
-
-    Timer timer;
-} Board;
 
 static Texture2D texture = {0};
 
@@ -166,21 +134,18 @@ void Board_MoveDown(Board *board)
     Timer_Reset(&board->timer);
 }
 
-void Board_Init(Board *board)
+Board Board_New()
 {
-    memset(board->cells, 0, sizeof(board->cells));
+    Board board = {0};
 
-    Board_NextTetromino(board);
+    memset(board.cells, 0, sizeof(board.cells));
+    Board_NextTetromino(&board);
+    Timer_Reset(&board.timer);
 
-    Timer_Reset(&board->timer);
-
-    if (texture.id == 0)
-    {
-        texture = LoadTexture("resources/block.png");
-    }
+    return board;
 }
 
-void Board_Pause(Board *board, bool pause)
+void Board_SetPause(Board *board, bool pause)
 {
     board->isPaused = pause;
 }
@@ -196,6 +161,7 @@ void DrawCell(int x, int y, float cellWidth, float cellHeight, Color color, Text
             (Vector2){0, 0},
             0,
             color);
+
         return;
     }
 
@@ -216,12 +182,6 @@ void DrawTetromino(
     int offset_x,
     int offset_y)
 {
-
-    if (!texture.id)
-    {
-        texture = LoadTexture("resources/block.png");
-    }
-
     for (int row = 0; row < 4; row++)
     {
         for (int col = 0; col < 4; col++)
@@ -251,11 +211,21 @@ void Board_Draw(const Board *board, Rectangle area)
     float cellWidth = round(area.width / GRID_COLS);
     float cellHeight = round(area.height / GRID_ROWS);
 
+    DrawRectangle(
+        area.x,
+        area.y,
+        area.width,
+        area.height,
+        (Color){40, 40, 132, 255});
+
     for (int row = 0; row < GRID_ROWS; row++)
     {
         for (int col = 0; col < GRID_COLS; col++)
         {
             int cell = board->cells[row * GRID_COLS + col];
+
+            if (cell == 0)
+                continue;
 
             DrawCell(
                 area.x + col * cellWidth,
@@ -279,15 +249,6 @@ void Board_Draw(const Board *board, Rectangle area)
 
     DrawTetromino(
         &board->tetromino.shape,
-        Vector2Subtract(board->tetromino.position, (Vector2){0, cellHeight / 3.0}),
-        (Color){255, 255, 255, 150},
-        cellWidth,
-        cellHeight,
-        area.x,
-        area.y);
-
-    DrawTetromino(
-        &board->tetromino.shape,
         board->tetromino.position,
         colors[board->tetromino.color],
         cellWidth,
@@ -298,6 +259,9 @@ void Board_Draw(const Board *board, Rectangle area)
 
 void Board_Update(Board *board)
 {
+    if (board->isPaused)
+        return;
+
     if (Timer_GetElapsedTime(&board->timer) > MAX_FALL_TIME)
     {
         Board_MoveDown(board);
@@ -348,23 +312,21 @@ void Board_TryRotateWithKick(Board *board, RotationDirection direction)
 
     int kicks[5][2];
 
-    printf("Rotation %d", board->tetromino.shape.rotation_index);
-
     switch (board->tetromino.shape.type)
     {
     case PIECE_I:
         const int iKicks[4][5][2] = {
+            // L -> 0
+            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
             // 0 -> R
             {{0, 0}, {-2, 0}, {+1, 0}, {-2, -1}, {+1, +2}},
             // R -> 2
             {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},
             // 2 -> L
             {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},
-            // L -> 0
-            {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},
         };
 
-        memcpy(kicks, iKicks[board->tetromino.shape.rotation_index], sizeof(int[5][2]));
+        memcpy(kicks, iKicks[board->tetromino.shape.rotation_index], sizeof(kicks));
         break;
 
     case PIECE_O:
@@ -374,18 +336,18 @@ void Board_TryRotateWithKick(Board *board, RotationDirection direction)
         break;
 
     default:
-        const int kicks[4][5][2] = {
+        const int dKicks[4][5][2] = {
+            // L -> 0
+            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
             // 0 -> R
             {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},
             // R -> 2
             {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},
             // 2 -> L
             {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},
-            // L -> 0
-            {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},
         };
 
-        memcpy(kicks, iKicks[board->tetromino.shape.rotation_index], sizeof(int[5][2]));
+        memcpy(kicks, dKicks[board->tetromino.shape.rotation_index], sizeof(kicks));
         break;
     }
 
@@ -395,7 +357,7 @@ void Board_TryRotateWithKick(Board *board, RotationDirection direction)
     {
         Vector2 newPosition = {
             originalPosition.x + kicks[i][0],
-            originalPosition.y + kicks[i][1]};
+            originalPosition.y - kicks[i][1]};
 
         if (!CheckCollision(board, newPosition.x, newPosition.y))
         {
@@ -417,5 +379,3 @@ void Board_RotateLeft(Board *board)
 {
     Board_TryRotateWithKick(board, COUNTERCLOCKWISE);
 }
-
-#endif

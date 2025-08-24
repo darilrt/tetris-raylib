@@ -1,16 +1,16 @@
-#define MAX_TOUCH_POINTS 1
 #include "raylib.h"
 
-#ifdef __ANDROID__
-#define DEBUG_FONT_SCALE 3.0f
-#endif
 #include "debug.h"
 
 #include "game.h"
-
-#include <string.h>
+#include "cfg.h"
 
 Debugger debugger;
+
+Debugger *get_debugger()
+{
+    return &debugger;
+}
 
 void debug_log(const char *fmt, ...)
 {
@@ -34,21 +34,13 @@ int main(void)
     SetTargetFPS(60);
 
     debugger = Debugger_New();
-
-#ifdef __ANDROID__
-    debug_log("Im in Android");
-#else
-    debug_log("Im not in Android");
-#endif
+    debugger.fontScale = 1.5f;
 
     GameState *state = malloc(sizeof(GameState));
     *state = GameState_New();
 
     while (!WindowShouldClose())
     {
-        if (IsKeyDown(KEY_T))
-            debug_log("T key is down");
-
         BeginDrawing();
         ClearBackground(RAYWHITE);
 

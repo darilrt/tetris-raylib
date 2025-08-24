@@ -1,5 +1,5 @@
 DIR_MAKEFILE := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-APK_FILE = $(DIR_MAKEFILE)/src/raylib_game.apk
+APK_FILE = $(DIR_MAKEFILE)/raylib_game.apk
 APP_NAME = com.raylib.rgame
 
 .PHONY: build build-android 
@@ -12,7 +12,7 @@ run:
 	cd bin && tetris-game.exe
 
 build-android:
-	cd src && make clean && $(MAKE) PLATFORM=PLATFORM_ANDROID
+	make -f Makefile.pre clean && $(MAKE) -f Makefile.pre PLATFORM=PLATFORM_ANDROID
 
 run-android:
 	make build-android
@@ -20,5 +20,4 @@ run-android:
 	adb shell am start -n $(APP_NAME)/.NativeLoader
 
 clean:
-	cd src && $(MAKE) clean
-	adb uninstall $(APP_NAME)
+	cmake --build build --target clean

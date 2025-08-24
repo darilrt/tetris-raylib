@@ -1,12 +1,6 @@
-#ifndef TIMER_H
-#define TIMER_H
-
 #include "raylib.h"
 
-typedef struct
-{
-    float start;
-} Timer;
+#include "timer.h"
 
 float Timer_GetElapsedTime(const Timer *timer)
 {
@@ -17,5 +11,3 @@ void Timer_Reset(Timer *timer)
 {
     timer->start = GetTime();
 }
-
-#endif

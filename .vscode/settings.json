@@ -19,6 +19,12 @@
     "tetrimons.h": "c",
     "tetrominos.h": "c",
     "stdio.h": "c",
-    "timer.h": "c"
+    "timer.h": "c",
+    "gesture.h": "c",
+    "corecrt_wstdio.h": "c",
+    "config.h": "c",
+    "theme.h": "c",
+    "cfg.h": "c",
+    "stdlib.h": "c"
   }
 }

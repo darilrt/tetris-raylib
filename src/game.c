@@ -1,27 +1,5 @@
-#ifndef GAME_H
-#define GAME_H
-
-#include <stdlib.h>
-
-#include "raylib.h"
-#include "board.h"
-#include "gesture.h"
-
-typedef enum
-{
-    SCREEN_TITLE,
-    SCREEN_GAME,
-} Screen;
-
-typedef struct
-{
-    Screen screen;
-    int screenWidth;
-    int screenHeight;
-
-    Board grid;
-    GestureHandler gestureHandler;
-} GameState;
+#include "game.h"
+#include "debug.h"
 
 GameState GameState_New()
 {
@@ -33,7 +11,19 @@ GameState GameState_New()
 
     state.gestureHandler = GestureHandler_New();
 
-    Board_Init(&state.grid);
+    state.grid = Board_New();
+
+    state.theme = Theme_New();
+
+    if (!Theme_Load(&state.theme, "test_pack"))
+    {
+        TraceLog(LOG_ERROR, "Error loading theme: test_pack");
+        return state;
+    }
+
+    debug_log("Theme loaded: %s", state.theme.name ? state.theme.name : "No name");
+
+    get_debugger()->font = state.theme.font;
 
     return state;
 }
@@ -158,8 +148,12 @@ void GameState_UpdateGame(GameState *state)
         Board_Fall(&state->grid);
     if (IsKeyPressed(KEY_DOWN))
         Board_MoveDown(&state->grid);
+
     if (IsKeyPressed(KEY_P))
-        Board_Pause(&state->grid, !&state->grid.isPaused);
+    {
+        Board_SetPause(&state->grid, !state->grid.isPaused);
+        debug_log("Pause %s", state->grid.isPaused ? "ON" : "OFF");
+    }
 
     Board_Update(&state->grid);
     DrawGame(&state->grid, state->screenWidth, state->screenHeight);
@@ -182,5 +176,3 @@ void GameState_Update(GameState *state)
         break;
     }
 }
-
-#endif

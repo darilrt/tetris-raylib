@@ -1,51 +1,10 @@
-#ifndef DEBUG_H
-#define DEBUG_H
-
-#include "raylib.h"
-#include "raymath.h"
-
-#include <stdio.h>
-#include <string.h>
-
-#ifndef MAX_LOGS
-#define MAX_LOGS 15
-#endif
-
-#ifndef LOG_SIZE
-#define LOG_SIZE 256
-#endif
-
-#ifndef LOG_LIFE
-#define LOG_LIFE 5.0f
-#endif
-
-#ifndef DEBUG_FONT_SCALE
-#define DEBUG_FONT_SCALE 1.0f
-#endif
-
-#ifndef DEBUG_COLOR
-#define DEBUG_COLOR RED
-#endif
-
-typedef struct
-{
-    char message[LOG_SIZE];
-    float timestamp;
-} Log;
-
-typedef struct
-{
-    Font font;
-    Vector2 screenSize;
-
-    Log logs[MAX_LOGS];
-    int logCount;
-} Debugger;
+#include "debug.h"
 
 Debugger Debugger_New()
 {
     Debugger debugger;
-    debugger.font = LoadFontEx("resources/test_pack/font.ttf", 32, 0, 250);
+    debugger.font = LoadFont("resources/fonts/mecha.png");
+    debugger.fontScale = 1.0f;
     debugger.logCount = 0;
     debugger.screenSize = (Vector2){
         (float)GetScreenWidth(),
@@ -76,7 +35,7 @@ void Debugger_Update(Debugger *debugger)
         };
     }
 
-    float fontSize = (debugger->screenSize.x / 50.0f) * DEBUG_FONT_SCALE;
+    float fontSize = (debugger->screenSize.x / 50.0f) * debugger->fontScale;
 
     const float margin = 5;
     float y = margin;
@@ -133,7 +92,3 @@ void Debugger_LogF(Debugger *debugger, const char *format, va_list args)
     size_t len = (n < sizeof(buffer)) ? n : sizeof(buffer) - 1;
     Debugger_Log(debugger, buffer, len);
 }
-
-void debug_log(const char *fmt, ...);
-
-#endif
